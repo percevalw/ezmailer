@@ -1,4 +1,4 @@
-from ezmailer.component import Component
+from .component import Component
 import collections
 
 
