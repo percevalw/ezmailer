@@ -3,9 +3,10 @@ from lxml import etree
 
 class TrancludeMarker:
     prefix = "TRANSCLUDE"
+    root = '__root__'
 
-    def __init__(self, key=""):
-        self.key = key
+    def __init__(self, key=None):
+        self.key = key or TrancludeMarker.root
 
     def __str__(self):
         return "<{} id=\"{}\" key=\"{}\"/>".format(TrancludeMarker.prefix, id(self), self.key)

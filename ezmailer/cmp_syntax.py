@@ -1,42 +1,13 @@
 import collections
-from treeprinter import TreePrinter
+from .utils import as_sequence
+from .component import TrancludeMarker
 
 
-def as_sequence(obj):
-    if isinstance(obj, collections.Sequence):
-        return obj
-    return [obj]
-
-
-def collection_values(obj):
-    return obj.values() if isinstance(obj, collections.Mapping) else obj
-
-
-@TreePrinter(lambda obj: [o for l in collection_values(obj.children) for o in l], lambda obj: str(obj.component))
-class Transclusion:
-    def __init__(self, component, parent=None, children=None):
-        self.component = component
-        self.children = children if children else []
-        self.parent = parent
-
-    @property
-    def parent(self):
-        return self._parent
-
-    @parent.setter
-    def parent(self, p):
-        self._parent = p
-
-    @property
-    def root(self):
-        return self.parent.root if self.parent else self
-
-
-def add_transclusion_operator(cls):
+def add_transclusion_operator(cls, transclusion_cls):
     new_dict = dict(cls.__dict__)
 
     def as_transclusion(self, obj, parent=None):
-        if isinstance(obj, Transclusion):
+        if isinstance(obj, transclusion_cls):
             obj.parent = parent
             return obj
         elif hasattr(obj, 'get_or_create_transclusion'):
@@ -46,23 +17,25 @@ def add_transclusion_operator(cls):
 
     def get_or_create_transclusion(self, parent=None):
         if not self.__transclusion__:
-            self.__transclusion__ = Transclusion(self, parent)
+            self.__transclusion__ = transclusion_cls(self, parent)
         return self.__transclusion__
 
     def gt(self, other):
         t = self.get_or_create_transclusion()
         if isinstance(other, collections.Mapping):
-            children = other.__class__({k: as_sequence(as_transclusion(t, v)) for k, v in other.items()})
+            children = {key: [as_transclusion(t, comp) for comp in as_sequence(components)]
+                        for key, components in other.items()}
         elif isinstance(other, collections.Sequence):
-            children = other.__class__([as_sequence(as_transclusion(t, v)) for v in other])
-        elif isinstance(other, self.__class__):
-            children = [[as_transclusion(t, other)]]
+            children = {TrancludeMarker.root: [as_transclusion(t, v) for v in other]}
+        elif isinstance(other, new_type):
+            children = {TrancludeMarker.root: [as_transclusion(t, other)]}
         else:
             raise Exception("Right member in > inclusion must be either a mapping, a sequence or a includable element")
         t.children = children
         return t.root
 
     def init(self, *args, **kwargs):
+        print("ARGS", *args, "KWARGS", **kwargs)
         cls.__dict__['__init__'](self, *args, **kwargs)
         self.__transclusion__ = None
 
