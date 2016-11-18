@@ -35,7 +35,6 @@ def add_transclusion_operator(cls, transclusion_cls):
         return t.root
 
     def init(self, *args, **kwargs):
-        print("ARGS", *args, "KWARGS", **kwargs)
         cls.__dict__['__init__'](self, *args, **kwargs)
         self.__transclusion__ = None
 

@@ -6,17 +6,18 @@ from odictliteral import odict
 from treeprinter import TreePrinter
 
 rd = Renderer()
-text_parent = "<div><div>{}</div><div>{}</div></div>".format(TrancludeMarker(), TrancludeMarker())
+text_parent = "<parent><head>{}</head><foot>{}</foot></parent>".format(TrancludeMarker("head"), TrancludeMarker("foot"))
 text_child = "<child>{}</child>".format(TrancludeMarker())
 text_grand_child = "<grandchild></grandchild>"
 
 tp = TreePrinter("getchildren", "tag")
 
 
-cp = Component(text_parent)
-cp_child = Component(text_child)
-#res = rd.build(odict[cp: cp_child])
-#tp.pprint(res[0].tree)
+# cp = Component(text_parent)
+# cp_child = Component(text_child)
+# cp_grand_child = Component(text_grand_child)
+# res = cp_child.transclude(__root__= cp_grand_child)
+# tp.pprint(cp_child.tree)
 
 Component = add_transclusion_operator(Component, Transclusion)
 
@@ -34,7 +35,7 @@ def get_tree_tag(obj):
 
 tpt = TreePrinter(get_tree_children, get_tree_tag)
 
-tpt.pprint(Component(text_parent) > {
-    "head": Component(text_child) > Component(text_grand_child),
-    "foot": Component(text_grand_child)
-})
+tp.pprint(rd.render(Component(text_parent) > {
+    "foot": Component(text_child) > Component(text_grand_child),
+    "head": Component(text_grand_child)
+}))

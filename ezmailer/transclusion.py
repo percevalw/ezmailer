@@ -27,6 +27,9 @@ class Transclusion:
     def root(self):
         return self.parent.root if self.parent else self
 
-    def render(self):
-        if isinstance(self.children, collections.Sequence):
-            self.children
+    def build(self):
+        rendered_children = {
+            key: [t.build() for t in sub_transclusions] for key, sub_transclusions in self.children.items()
+        }
+        self.component.transclude(**rendered_children)
+        return self.component
