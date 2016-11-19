@@ -2,6 +2,7 @@ from ezmailer.utils import *
 
 import ezmailer.cmp_syntax
 from ezmailer.api import Renderer, Component, TrancludeMarker, Transclusion
+from ezmailer.api.components import Text
 from treeprinter import TreePrinter
 from lxml import etree
 
@@ -36,5 +37,5 @@ tpt = TreePrinter(get_tree_children, get_tree_tag)
 
 print(etree.tostring(rd.render(Component.fromstring(text_parent) > {
     "foot": Component.fromstring(text_child) > Component.fromstring(text_grand_child),
-    "head": Component.fromstring(text_grand_child)
+    "head": Text("Ceci est du texte")
 }), pretty_print=True).decode('utf-8'))
