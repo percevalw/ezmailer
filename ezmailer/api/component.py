@@ -17,8 +17,6 @@ def add_transclusion_operator(cls, transclusion_cls):
             return obj
         elif hasattr(obj, 'get_or_create_transclusion'):
             return obj.get_or_create_transclusion(parent)
-        elif isinstance(obj, six.string_types):
-            return TextComponent(obj).get_or_create_transclusion(parent)
         else:
             raise Exception("{} should be either a Component or a Transclusion".format(type(obj)))
 
@@ -33,13 +31,15 @@ def add_transclusion_operator(cls, transclusion_cls):
         if isinstance(other, collections.Mapping):
             children = {key: [as_transclusion(comp, t) for comp in as_sequence(components)]
                         for key, components in other.items()}
-        elif isinstance(other, collections.Sequence):
+        elif isinstance(other, collections.Sequence) and not isinstance(other, six.string_types):
             children = {TrancludeMarker.root: [as_transclusion(v, t) for v in other]}
         elif isinstance(other, new_type):
             children = {TrancludeMarker.root: [as_transclusion(other, t)]}
         elif isinstance(other, Transclusion):
             other.parent = t
             children = {TrancludeMarker.root: [other]}
+        elif isinstance(other, six.string_types):
+            children = {TrancludeMarker.root: [as_transclusion(TextComponent(other), t)]}
         else:
             raise Exception("Right member in > inclusion must be either a mapping, a sequence or a includable element, not {}".format(repr(other)))
         t.children = children
