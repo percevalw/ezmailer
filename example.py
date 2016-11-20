@@ -1,8 +1,8 @@
 from ezmailer.utils import *
 
 import ezmailer.cmp_syntax
-from ezmailer.api import Renderer, Component, TrancludeMarker, Transclusion
-from ezmailer.api.components import Text
+from ezmailer.api import Renderer, TreeComponent, TextComponent, TrancludeMarker, Transclusion
+from ezmailer.api.components import *
 from treeprinter import TreePrinter
 from lxml import etree
 
@@ -35,7 +35,14 @@ def get_tree_tag(obj):
 
 tpt = TreePrinter(get_tree_children, get_tree_tag)
 
-print(etree.tostring(rd.render(Component.fromstring(text_parent) > {
-    "foot": Component.fromstring(text_child) > Component.fromstring(text_grand_child),
-    "head": Text("Ceci est du texte")
+print(etree.tostring(rd.render(TreeComponent.fromstring(text_parent) > {
+    "foot": TreeComponent.fromstring(text_child) > TreeComponent.fromstring(text_grand_child),
+    "head": Link() > [
+        TextComponent("Ceci est du texte"),
+        TreeComponent.fromstring(text_grand_child),
+        TextComponent("Ceci aussi")
+    ]
 }), pretty_print=True).decode('utf-8'))
+elem = etree.fromstring("<a>text<div></div><div></div>text</a>")
+print(elem[1].text)
+print(etree.tostring(elem, pretty_print=True).decode('utf-8'))

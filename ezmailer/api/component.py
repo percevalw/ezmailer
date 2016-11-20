@@ -61,7 +61,32 @@ class TrancludeMarker:
 
 
 class Component:
+    def __init__(self):
+        pass
+
+    def transclude(self, **replacements):
+        raise NotImplementedError()
+
+
+print("CREATING COMPONENT")
+
+if USE_CMP_SYNTAX[0]:
+    print("OK!")
+    Component = add_transclusion_operator(Component, Transclusion)
+
+
+class TextComponent(Component):
+    def __init__(self, text):
+        super(TextComponent, self).__init__()
+        self.text = text
+
+    def transclude(self, **replacements):
+        pass
+
+
+class TreeComponent(Component):
     def __init__(self, tree):
+        super(TreeComponent, self).__init__()
         self.tree = tree
         markers = self.tree.findall('.//{}'.format(TrancludeMarker.prefix))
         self.transclude_markers = {}
@@ -73,7 +98,7 @@ class Component:
 
     @staticmethod
     def fromstring(s):
-        return Component(etree.fromstring(s))
+        return TreeComponent(etree.fromstring(s))
 
     def transclude(self, **replacements):
         for key, replacement in replacements.items():
@@ -82,13 +107,14 @@ class Component:
             marker = self.transclude_markers[key]
             if not isinstance(replacement, list):
                 replacement = [replacement]
-            for element in replacement:
-                marker.addnext(element.tree)
+            previous = marker.getprevious()
+            for i, element in enumerate(replacement):
+                if isinstance(element, TreeComponent):
+                    marker.addnext(element.tree)
+                    previous = element.tree
+                elif isinstance(element, TextComponent):
+                    if previous is not None:
+                        previous.tail = (previous.tail or "") + element.text
+                    else:
+                        marker.getparent().text = (marker.getparent().text or "") + element.text
             marker.getparent().remove(marker)
-
-print("CREATING COMPONENT")
-
-if USE_CMP_SYNTAX[0]:
-    print("OK!")
-    Component = add_transclusion_operator(Component, Transclusion)
-
