@@ -36,16 +36,19 @@ def get_tree_tag(obj):
 
 tpt = TreePrinter(get_tree_children, get_tree_tag)
 
-print(etree.tostring(rd.render(
+tree_comp = (
     TreeComponent.fromstring(text_parent) > {
-        "foot": TreeComponent.fromstring(text_child) > TreeComponent.fromstring(text_grand_child),
-        "head": Link() > [
+        "foot": P() > TreeComponent.fromstring(text_grand_child),
+        "head": Cell() > Link() > [
             "Ceci est du texte",
             TreeComponent.fromstring(text_grand_child),
             "Ceci aussi"
         ]
     }
-), pretty_print=True).decode('utf-8'))
-elem = etree.fromstring("<a>text<div></div><div></div>text</a>")
-print(elem[1].text)
-print(etree.tostring(elem, pretty_print=True).decode('utf-8'))
+)
+#print(tree_comp)
+tpt.pprint(tree_comp)
+html = etree.tostring(rd.render(tree_comp), pretty_print=True).decode('utf-8')
+print(html)
+# with open("example.html", 'w') as f:
+#    f.write(html)

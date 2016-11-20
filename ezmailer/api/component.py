@@ -11,7 +11,7 @@ from .transclusion import Transclusion
 def add_transclusion_operator(cls, transclusion_cls):
     new_dict = dict(cls.__dict__)
 
-    def as_transclusion(self, obj, parent=None):
+    def as_transclusion(obj, parent=None):
         if isinstance(obj, transclusion_cls):
             obj.parent = parent
             return obj
@@ -28,16 +28,20 @@ def add_transclusion_operator(cls, transclusion_cls):
         return self.__transclusion__
 
     def gt(self, other):
+        print(self, other)
         t = self.get_or_create_transclusion()
         if isinstance(other, collections.Mapping):
-            children = {key: [as_transclusion(t, comp) for comp in as_sequence(components)]
+            children = {key: [as_transclusion(comp, t) for comp in as_sequence(components)]
                         for key, components in other.items()}
         elif isinstance(other, collections.Sequence):
-            children = {TrancludeMarker.root: [as_transclusion(t, v) for v in other]}
+            children = {TrancludeMarker.root: [as_transclusion(v, t) for v in other]}
         elif isinstance(other, new_type):
-            children = {TrancludeMarker.root: [as_transclusion(t, other)]}
+            children = {TrancludeMarker.root: [as_transclusion(other, t)]}
+        elif isinstance(other, Transclusion):
+            other.parent = t
+            children = {TrancludeMarker.root: [other]}
         else:
-            raise Exception("Right member in > inclusion must be either a mapping, a sequence or a includable element")
+            raise Exception("Right member in > inclusion must be either a mapping, a sequence or a includable element, not {}".format(repr(other)))
         t.children = children
         return t.root
 
@@ -86,6 +90,9 @@ class TextComponent(Component):
     def transclude(self, **replacements):
         pass
 
+    def __repr__(self):
+        return '<{} text="{}">'.format(self.__class__.__name__, self.text)
+
 
 class TreeComponent(Component):
     def __init__(self, tree):
@@ -98,6 +105,9 @@ class TreeComponent(Component):
             if key in self.transclude_markers:
                 raise Exception("Keys must be unique in component definition, {} is not".format(key))
             self.transclude_markers[key] = marker
+
+    def __repr__(self):
+        return '<{}>'.format(self.__class__.__name__)
 
     @staticmethod
     def fromstring(s):
