@@ -17,6 +17,9 @@ def dict_to_attr(d):
 
 
 def make_tag(tag_name, dict_attr, content=""):
+    if "cl" in dict_attr:
+        dict_attr["class"] = dict_attr["cl"]
+        del dict_attr["cl"]
     return "<{tag_name} {attr}>{content}</{tag_name}>".format(
         tag_name=tag_name,
         attr=dict_to_attr(dict_attr),
