@@ -121,7 +121,7 @@ class TreeComponent(Component):
             if not isinstance(replacement, list):
                 replacement = [replacement]
             previous = marker.getprevious()
-            for i, element in enumerate(replacement):
+            for element in reversed(replacement):
                 if isinstance(element, TreeComponent):
                     marker.addnext(element.tree)
                     previous = element.tree

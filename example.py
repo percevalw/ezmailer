@@ -36,19 +36,32 @@ def get_tree_tag(obj):
 
 tpt = TreePrinter(get_tree_children, get_tree_tag)
 
-tree_comp = (
-    TreeComponent.fromstring(text_parent) > {
-        "foot": P() > TreeComponent.fromstring(text_grand_child),
-        "head": Cell() > Link() > [
-            "Ceci est du texte",
-            TreeComponent.fromstring(text_grand_child),
-            "Ceci aussi"
-        ]
-    }
-)
+# tree_comp = (
+#     TreeComponent.fromstring(text_parent) > {
+#         "foot": P() > TreeComponent.fromstring(text_grand_child),
+#         "head": Cell() > Link() > [
+#             "Ceci est du texte",
+#             TreeComponent.fromstring(text_grand_child),
+#             "Ceci aussi"
+#         ]
+#     }
+# )
+with open("bootstrap.min.css", 'r') as style_file:
+    style = style_file.read()
+tree_comp = Email(style) > Box() > [
+    Row() > [
+        Cell() > Button() > "Button 1",
+        Cell() > '',
+        Cell() > Button() > "Button 2"
+    ],
+    Row() > [
+        Cell() > '',
+        Cell() > Button() > "Button 3",
+    ],
+]
 #print(tree_comp)
 tpt.pprint(tree_comp)
 html = etree.tostring(rd.render(tree_comp), pretty_print=True).decode('utf-8')
 print(html)
-# with open("example.html", 'w') as f:
-#    f.write(html)
+with open("example.html", 'w') as f:
+    f.write(html)
