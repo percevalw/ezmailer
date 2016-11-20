@@ -2,6 +2,7 @@ import collections
 
 from lxml import etree
 
+import six
 from ezmailer._cmp_syntax import USE_CMP_SYNTAX
 from ezmailer.utils import as_sequence
 from .transclusion import Transclusion
@@ -16,6 +17,8 @@ def add_transclusion_operator(cls, transclusion_cls):
             return obj
         elif hasattr(obj, 'get_or_create_transclusion'):
             return obj.get_or_create_transclusion(parent)
+        elif isinstance(obj, six.string_types):
+            return TextComponent(obj).get_or_create_transclusion(parent)
         else:
             raise Exception("{} should be either a Component or a Transclusion".format(type(obj)))
 

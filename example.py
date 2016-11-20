@@ -27,6 +27,7 @@ def get_tree_children(obj):
     elif isinstance(obj, tuple):
         return obj[1]
 
+
 def get_tree_tag(obj):
     if isinstance(obj, Transclusion):
         return str(obj.component)
@@ -35,14 +36,16 @@ def get_tree_tag(obj):
 
 tpt = TreePrinter(get_tree_children, get_tree_tag)
 
-print(etree.tostring(rd.render(TreeComponent.fromstring(text_parent) > {
-    "foot": TreeComponent.fromstring(text_child) > TreeComponent.fromstring(text_grand_child),
-    "head": Link() > [
-        TextComponent("Ceci est du texte"),
-        TreeComponent.fromstring(text_grand_child),
-        TextComponent("Ceci aussi")
-    ]
-}), pretty_print=True).decode('utf-8'))
+print(etree.tostring(rd.render(
+    TreeComponent.fromstring(text_parent) > {
+        "foot": TreeComponent.fromstring(text_child) > TreeComponent.fromstring(text_grand_child),
+        "head": Link() > [
+            "Ceci est du texte",
+            TreeComponent.fromstring(text_grand_child),
+            "Ceci aussi"
+        ]
+    }
+), pretty_print=True).decode('utf-8'))
 elem = etree.fromstring("<a>text<div></div><div></div>text</a>")
 print(elem[1].text)
 print(etree.tostring(elem, pretty_print=True).decode('utf-8'))
